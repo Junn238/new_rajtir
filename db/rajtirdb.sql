@@ -4,6 +4,7 @@
 --Ocupas crear primero la base de datos dentro de MySQL Workbench
 --Despues la colocas como la base de datos predeterminada
 --Y ejecutas este query dentro de la base de datos
+
 -- Host: localhost    Database: rajtir
 -- ------------------------------------------------------
 -- Server version	8.0.42
