@@ -1,5 +1,7 @@
 from tkinter import *
 from tkinter import ttk
+
+#ventanas a utilizar (5 ventanas + main)
 from movimientos import view_movs
 from empleados import view_emp
 from productos import view_prod
