@@ -115,8 +115,8 @@ def view_prod(parent):
     entry_widgets = {}
     for i, (label_text, var_name) in enumerate(campos):
         ttk.Label(frame, text=label_text).grid(row=i, column=0, sticky="e", pady=2, padx=5)
-        entry = ttk.Entry(frame, width=40)
-        entry.grid(row=i, column=1, sticky="w", pady=2, padx=5)
+        entry = ttk.Entry(frame)
+        entry.grid(row=i, column=1, sticky="ew", pady=2, padx=5)
         entry_widgets[var_name] = entry
 
     global id_entry, nom_entry, val_entry, mar_entry, can_entry, des_entry
@@ -143,20 +143,31 @@ def view_prod(parent):
     ttk.Button(btn_frame, text="Eliminar", command=eliminar_producto).grid(row=0, column=2, padx=5)
     ttk.Button(btn_frame, text="Ver Productos", command=ver_productos).grid(row=0, column=3, padx=5)
 
+    # Frame contenedor de la tabla y scrollbar
+    table_frame = ttk.Frame(frame)
+    table_frame.grid(row=8, column=0, columnspan=3, sticky="nsew", padx=6, pady=5)
+
     # Tabla
     global tree
-    tree = ttk.Treeview(frame, columns=("ID", "Nombre", "Valor", "Marca", "Cantidad", "Descripción", "Proveedor"), show="headings", height=10)
-    tree.grid(row=8, column=0, columnspan=2, sticky="nsew", padx=10, pady=5)
+    tree = ttk.Treeview(table_frame, columns=("ID", "Nombre", "Valor", "Marca", "Cantidad", "Descripción", "Proveedor"), show="headings")
+    tree.pack(side="left", fill="both", expand=True)
 
-    # Ajustar encabezados
+    # Scrollbar vertical
+    scrollbar = ttk.Scrollbar(table_frame, orient="vertical", command=tree.yview)
+    scrollbar.pack(side="right", fill="y")
+    tree.configure(yscrollcommand=scrollbar.set)
+
+    # Configurar encabezados y columnas
     for col in tree["columns"]:
         tree.heading(col, text=col)
-        tree.column(col, width=100, anchor="center")
+        tree.column(col, anchor="center", stretch=True)
 
-    # Expandir la tabla si se redimensiona la pestaña
+    # Permitir expansión dinámica del contenido
     frame.columnconfigure(0, weight=1)
     frame.columnconfigure(1, weight=1)
+    frame.columnconfigure(2, weight=0)  # Scrollbar no se expande
     frame.rowconfigure(8, weight=1)
+
 
     ver_productos()
 
