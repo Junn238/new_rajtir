@@ -11,7 +11,7 @@ def view_movs(root):
 
     carrito = []
 
-    # --- Funciones ---
+    # --- Funciones ---   
     def actualizar_total():
         total = sum(item["subtotal"] for item in carrito)
         total_label.config(text=f"Total: ${total:.2f}")
@@ -154,7 +154,7 @@ def view_movs(root):
         cursor.execute("SELECT * FROM movimiento")
         for row in cursor.fetchall():
             tree.insert("", END, values=row)
-    
+
 
     # --- UI ---
 
