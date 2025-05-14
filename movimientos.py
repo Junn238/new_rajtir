@@ -1,7 +1,10 @@
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
 from tkinter import *
 from tkinter import ttk, messagebox
 from mysqlconn import *
 import datetime
+
 
 cursor = init_conn()
 
@@ -92,6 +95,8 @@ def view_movs(root):
             total_carrito = float(actualizar_total())
             fecha_actual = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             fecha_fin = (datetime.datetime.now() + datetime.timedelta(days=30)).strftime("%Y-%m-%d %H:%M:%S")
+            lineas_recibo = []
+            id_mov = 0
 
             cliente_id = None
             if tipo == "Apartado":
@@ -117,6 +122,13 @@ def view_movs(root):
                     cliente_id = cursor.lastrowid
 
             for item in carrito:
+                lineas_recibo.append({
+                    "nombre": item["nombre"],
+                    "cantidad": item["cantidad"],
+                    "precio": float(item["precio"]),
+                    "subtotal": float(item["subtotal"])
+                })
+
                 if tipo == "Apartado":
                     cursor.execute("""
                         SELECT Id_mov, Pag_mov, Fal_mov, Tot_mov
@@ -159,10 +171,51 @@ def view_movs(root):
 
             conexion.commit()
             messagebox.showinfo("Éxito", "Movimiento(s) guardado(s) correctamente.")
+
+            recibo_nombre = f"./recibos/recibo_{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+            c = canvas.Canvas(recibo_nombre, pagesize=letter)
+            width, height = letter
+
+            # Encabezado
+            c.setFont("Helvetica-Bold", 14)
+            c.drawString(50, height - 50, "Recibo de Compra")
+            c.setFont("Helvetica", 10)
+            c.drawString(50, height - 70, f"Fecha: {fecha_actual}")
+            c.drawString(50, height - 85, f"Cliente: {cliente_nombre}")
+            c.drawString(50, height - 100, f"Empleado: {empleado}")
+            c.drawString(50, height - 115, f"Tipo de Movimiento: {tipo}")
+
+            # Tabla
+            c.drawString(50, height - 140, "Productos:")
+            y = height - 155
+            c.drawString(50, y, "Producto")
+            c.drawString(200, y, "Cantidad")
+            c.drawString(300, y, "Precio")
+            c.drawString(400, y, "Subtotal")
+            y -= 15
+
+            for linea in lineas_recibo:
+                c.drawString(50, y, linea["nombre"])
+                c.drawString(200, y, str(linea["cantidad"]))
+                c.drawString(300, y, f"${linea['precio']:.2f}")
+                c.drawString(400, y, f"${linea['subtotal']:.2f}")
+                y -= 15
+
+            # Totales
+            y -= 10
+            c.drawString(50, y, f"Total: ${total_carrito:.2f}")
+            y -= 15
+            c.drawString(50, y, f"Pago: ${pago:.2f}")
+            c.drawString(200, y, f"Faltante: ${max(0, total_carrito - pago):.2f}")
+            c.drawString(400, y, f"Cambio: ${max(0, pago - total_carrito):.2f}")
+
+            c.save()
+
             carrito.clear()
             carrito_tree.delete(*carrito_tree.get_children())
             actualizar_total()
             ver_movs()
+
         except Exception as e:
             messagebox.showerror("Error al guardar", str(e))
 
