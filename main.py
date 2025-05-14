@@ -22,6 +22,9 @@ window.configure(bg=DARK_BG)
 style = ttk.Style()
 style.theme_use('default')
 
+#aqui inicio la imagen/logo de la tienda
+logoMICRAS = PhotoImage(file=".\\recursos\\logo_RAJTIR.png")
+
 # Estilo para las pestañas
 style.configure('TNotebook',
                 background=DARK_BG,
@@ -67,7 +70,7 @@ titulo = Label(menu,
 titulo.pack(side=TOP)
 
 area_img = Label(menu,
-                 text="*LOGO DE LA TIENDA*",
+                 image=logoMICRAS,
                  font=('', 35, 'bold'),
                  bg=DARK_BG,
                  fg=DARK_FG,
