@@ -182,49 +182,55 @@ def view_movs(root):
             messagebox.showerror("Error al cargar movimientos", str(e))
 
     def abonar_a_apartado():
+        pago = 0
         nombre = cliente_entry.get().strip()
         if not nombre:
             messagebox.showerror("Error", "Ingresa el nombre del cliente.")
             return
         try:
             pago = float(pago_entry.get())
+            cursor.execute("SELECT Id_cli FROM cliente WHERE Nom_cli = %s", (nombre,))
+            cli = cursor.fetchone()
+            if not cli:
+                messagebox.showerror("Error", "Cliente no encontrado.")
+                return
+
+            cliente_id = cli[0]
+
+            cursor.execute("""
+                SELECT Id_mov, Pag_mov, Fal_mov, Tot_mov
+                FROM movimiento
+                WHERE Cliente_Id = %s AND Fal_mov > 0
+                ORDER BY Id_mov DESC LIMIT 1
+            """, (cliente_id,))
+            mov = cursor.fetchone()
+
+            if not mov:
+                messagebox.showinfo("Info", "No hay apartados pendientes.")
+                return
+
+            mov_id = mov[0]
+            pago_anterior = float(mov[1]) 
+            falta_anterior = float(mov[2]) 
+            total = float(mov[3])
+            nuevo_pago = pago_anterior + pago
+            nuevo_falta = max(0, (total - nuevo_pago))
+            
+            nuevo_cambio = max(0, (nuevo_pago - total))
+
+            cursor.execute("""
+                UPDATE movimiento
+                SET Pag_mov = %s, Cam_mov = %s, Fal_mov = %s
+                WHERE Id_mov = %s
+            """, (nuevo_pago, nuevo_cambio, nuevo_falta, mov_id))
+            conexion.commit()
+            messagebox.showinfo("Éxito", "Abono registrado.")
+            ver_movs()
         except:
             messagebox.showerror("Error", "Pago inválido.")
             return
 
-        cursor.execute("SELECT Id_cli FROM cliente WHERE Nom_cli = %s", (nombre,))
-        cli = cursor.fetchone()
-        if not cli:
-            messagebox.showerror("Error", "Cliente no encontrado.")
-            return
-
-        cliente_id = cli[0]
-
-        cursor.execute("""
-            SELECT Id_mov, Pag_mov, Fal_mov, Tot_mov
-            FROM movimiento
-            WHERE Cliente_Id = %s AND Fal_mov > 0
-            ORDER BY Id_mov DESC LIMIT 1
-        """, (cliente_id,))
-        mov = cursor.fetchone()
-
-        if not mov:
-            messagebox.showinfo("Info", "No hay apartados pendientes.")
-            return
-
-        mov_id, pago_anterior, falta_anterior, total = mov
-        nuevo_pago = pago_anterior + pago
-        nuevo_falta = max(0, total - nuevo_pago)
-        nuevo_cambio = max(0, nuevo_pago - total)
-
-        cursor.execute("""
-            UPDATE movimiento
-            SET Pag_mov = %s, Cam_mov = %s, Fal_mov = %s
-            WHERE Id_mov = %s
-        """, (nuevo_pago, nuevo_cambio, nuevo_falta, mov_id))
-        conexion.commit()
-        messagebox.showinfo("Éxito", "Abono registrado.")
-        ver_movs()
+        
 
     def toggle_cliente_entry(*args):
         if tipo_mov.get() == "Apartado":
