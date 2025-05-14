@@ -4,7 +4,7 @@ import mysql.connector
 conexion = mysql.connector.connect(
     host="localhost",
     user="root",        #el user debe ser el mismo
-    password="rYsS_fk9TYZ",    #la contraseña varia, si alguien que no soy yo ejecuta el codigo debe cambiar la contraseña
+    password="root",    #la contraseña varia, si alguien que no soy yo ejecuta el codigo debe cambiar la contraseña
     database="rajtir"   #la db, si le pusiste el mismo nombre es el mismo
 )
 
@@ -12,3 +12,5 @@ def init_conn():
     cursor = conexion.cursor()
 
     return cursor
+
+
