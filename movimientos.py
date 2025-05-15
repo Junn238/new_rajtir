@@ -310,6 +310,7 @@ def view_movs(root):
 
     Label(form, text="Empleado:", bg="#d9d9d9").grid(row=2, column=0, sticky=W)
     empleado_cb = ttk.Combobox(form, width=37)
+    Button(form, text="Actualizar empleados", command=actualizar_empleados).grid(row=2, column=3, sticky=W)
     empleado_cb.grid(row=2, column=1, columnspan=2, sticky=W)
     actualizar_empleados()
 
